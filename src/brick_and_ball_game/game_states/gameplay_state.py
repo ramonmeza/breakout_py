@@ -19,11 +19,12 @@ class GameplayState(GameState):
     paddle: Paddle
     balls: list[Ball]
     bricks: BrickGrid
+    player_lives: int
 
     @override
     def load(self) -> None:
+        self.player_lives = 3
         self.play_bounds = Rectangle(0, 0, 800, 600)
-
         paddle_width: int = 75
         paddle_height: int = 10
         paddle_dist_from_bottom: int = 100
@@ -35,18 +36,15 @@ class GameplayState(GameState):
             bounds=self.play_bounds,
             speed=350.0,
         )
-
         self.balls = [
             Ball(
                 speed=250.0,
                 position=Vector2((self.play_bounds.width / 2), (paddle_y - 50)),
                 radius=5.0,
                 color=WHITE,
-                bounds=self.play_bounds,
                 velocity=Vector2(0.0, -1.0),
             ),
         ]
-
         self.bricks = BrickGrid(6, 9, Rectangle(0, 50, self.play_bounds.width, 150))
 
     @override
@@ -57,8 +55,30 @@ class GameplayState(GameState):
         self.paddle.update(delta_time)
         for ball in self.balls:
             ball.update(delta_time)
+            self.handle_ball_walls(ball)
             self.handle_ball_bricks(ball)
             self.handle_ball_paddle(ball)
+
+    def handle_ball_walls(self, ball: Ball) -> None:
+        # left
+        if ball.position.x - ball.radius < self.play_bounds.x:
+            ball.velocity.x *= -1
+            ball.position.x = self.play_bounds.x + ball.radius
+
+        # right
+        if ball.position.x + ball.radius > self.play_bounds.x + self.play_bounds.width:
+            ball.velocity.x *= -1
+            ball.position.x = self.play_bounds.x + self.play_bounds.width - ball.radius
+
+        # top
+        if ball.position.y - ball.radius < self.play_bounds.y:
+            ball.velocity.y *= -1
+            ball.position.y = self.play_bounds.y + ball.radius
+
+        # bottom
+        if ball.position.y + ball.radius > self.play_bounds.y + self.play_bounds.height:
+            ball.velocity.y *= -1
+            ball.position.y = self.play_bounds.y + self.play_bounds.height - ball.radius
 
     def handle_ball_bricks(self, ball: Ball) -> None:
         ball_coll: Rectangle = Rectangle(
