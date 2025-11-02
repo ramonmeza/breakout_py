@@ -1,8 +1,7 @@
 from __future__ import annotations
-from typing import Callable, override
+from typing import override
 
 from pyray import (
-    close_window,
     draw_text,
     KeyboardKey,
     measure_text,
@@ -13,11 +12,12 @@ from pyray import (
 
 from brick_and_ball_game.core.game_state import GameState
 from brick_and_ball_game.components.player_input_component import PlayerInputComponent
+from brick_and_ball_game.game_states.gameplay_state import GameplayState
 
 
 class MenuState(GameState):
     bounds: Rectangle
-    menu: dict[str, Callable[[], None]]
+    menu: list[str]
     player_input: PlayerInputComponent
 
     @override
@@ -27,10 +27,10 @@ class MenuState(GameState):
         self.player_input.add_button("Up", KeyboardKey.KEY_UP)
         self.player_input.add_button("Down", KeyboardKey.KEY_DOWN)
         self.player_input.add_button("Select", KeyboardKey.KEY_ENTER)
-        self.menu = {
-            "Play": lambda: print("play"),
-            "Quit": close_window,
-        }
+        self.menu = [
+            "Play",
+            "Quit"
+        ]
         self.selected_option = 0
 
     @override
@@ -39,22 +39,27 @@ class MenuState(GameState):
 
     def update(self, delta_time: float) -> None:
         if self.player_input.is_button_pressed("Up"):
-            self.selected_option = (self.selected_option + 1) % len(self.menu.keys())
+            self.selected_option = (self.selected_option + 1) % len(self.menu)
         elif self.player_input.is_button_pressed("Down"):
-            self.selected_option = (self.selected_option - 1) % len(self.menu.keys())
+            self.selected_option = (self.selected_option - 1) % len(self.menu)
 
         if self.player_input.is_button_pressed("Select"):
-            key: str = list(self.menu.keys())[self.selected_option]
-            print(key)
+            key: str = self.menu[self.selected_option]
+            match self.selected_option:
+                case 0:
+                    # play
+                    self.state_manager.push(GameplayState(self.state_manager))
+                case _:
+                    self.state_manager.pop()
 
     def draw(self) -> None:
         font_size: int = 30
         cur_y: int = 100
-        for i, menu_opt in enumerate(self.menu.keys()):
-            width: int = measure_text(menu_opt, font_size)
+        for i, text in enumerate(self.menu):
+            width: int = measure_text(text, font_size)
             cur_x: int = int((self.bounds.width / 2) + (width / 2))
             draw_text(
-                menu_opt,
+                text,
                 cur_x,
                 cur_y,
                 font_size,

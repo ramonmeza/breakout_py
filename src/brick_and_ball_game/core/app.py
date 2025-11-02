@@ -1,3 +1,5 @@
+from abc import ABC, abstractmethod
+
 from pyray import (
     begin_drawing,
     BLACK,
@@ -9,10 +11,10 @@ from pyray import (
     window_should_close,
 )
 
-from brick_and_ball_game.core.state_manager import StateManager
+from brick_and_ball_game.core.game_state import StateManager
 
 
-class App:
+class App(ABC):
     window_width: int
     window_height: int
     state_manager: StateManager
@@ -25,6 +27,10 @@ class App:
         self.window_title = title
         self.state_manager = StateManager()
 
+    @abstractmethod
+    def on_init(self) -> None:
+        raise NotImplementedError
+
     def _update(self, delta_time: float) -> None:
         self.state_manager.update(delta_time)
 
@@ -36,8 +42,7 @@ class App:
 
     def _load(self) -> None:
         init_window(self.window_width, self.window_height, self.window_title)
-        from brick_and_ball_game.game_states.menu_state import MenuState
-        self.state_manager.push(MenuState())
+        self.on_init()
 
     def _unload(self) -> None:
         self.state_manager.unload()
@@ -47,6 +52,8 @@ class App:
         self._load()
         try:
             while not window_should_close():
+                if self.state_manager.is_empty():
+                    break
                 self._update(delta_time=get_frame_time())
                 self._draw()
         finally:

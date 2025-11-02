@@ -1,8 +1,8 @@
-from brick_and_ball_game.core.app import App
+from brick_and_ball_game.brick_game import BrickGame
 
 
 def main() -> int:
-    app: App = App(800, 600, "Brick & Ball!")
+    app: BrickGame = BrickGame(800, 600, "Brick & Ball!")
     app.run()
     return 0
 
