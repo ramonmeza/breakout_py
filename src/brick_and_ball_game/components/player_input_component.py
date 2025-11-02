@@ -1,4 +1,4 @@
-from pyray import KeyboardKey, is_key_down
+from pyray import is_key_down, KeyboardKey
 
 
 class PlayerInputComponent:

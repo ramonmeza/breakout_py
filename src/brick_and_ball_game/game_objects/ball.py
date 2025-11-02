@@ -1,4 +1,4 @@
-from pyray import Rectangle, Vector2, Color, draw_circle, vector2_normalize
+from pyray import Color, draw_circle, Rectangle, Vector2
 
 from brick_and_ball_game.components import VelocityComponent
 
@@ -47,18 +47,39 @@ class Ball:
             self.position.y = self.bounds.y + self.bounds.height - self.radius
 
     def bounce_off(self, rect: Rectangle) -> bool:
+        # AABB collision check
         if (
-            (self.position.y + self.radius > rect.y)
-            and (self.position.y - self.radius < rect.y + rect.height)
-            and (self.position.x + self.radius > rect.x)
-            and (self.position.x - self.radius < rect.x + rect.width)
+            self.position.x + self.radius > rect.x
+            and self.position.x - self.radius < rect.x + rect.width
+            and self.position.y + self.radius > rect.y
+            and self.position.y - self.radius < rect.y + rect.height
         ):
-            if self.velocity.y > 0:
-                self.position.y = rect.y - self.radius
-            else:
-                self.position.y = rect.y + rect.height + self.radius
+            # compute overlap distances for all four sides
+            overlap_left = (self.position.x + self.radius) - rect.x
+            overlap_right = (rect.x + rect.width) - (self.position.x - self.radius)
+            overlap_top = (self.position.y + self.radius) - rect.y
+            overlap_bottom = (rect.y + rect.height) - (self.position.y - self.radius)
 
-            self.velocity.y *= -1
+            # find smallest overlap (the side we hit)
+            min_overlap = min(overlap_left, overlap_right, overlap_top, overlap_bottom)
+
+            if min_overlap == overlap_left:
+                # hit left side
+                self.position.x = rect.x - self.radius
+                self.velocity.x *= -1
+            elif min_overlap == overlap_right:
+                # hit right side
+                self.position.x = rect.x + rect.width + self.radius
+                self.velocity.x *= -1
+            elif min_overlap == overlap_top:
+                # hit top
+                self.position.y = rect.y - self.radius
+                self.velocity.y *= -1
+            elif min_overlap == overlap_bottom:
+                # hit bottom
+                self.position.y = rect.y + rect.height + self.radius
+                self.velocity.y *= -1
+
             return True
 
         return False

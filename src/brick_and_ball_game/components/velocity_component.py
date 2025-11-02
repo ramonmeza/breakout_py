@@ -1,4 +1,4 @@
-from pyray import Vector2, vector2_add, vector2_scale, vector2_normalize
+from pyray import Vector2, vector2_add, vector2_normalize, vector2_scale
 
 
 class VelocityComponent:

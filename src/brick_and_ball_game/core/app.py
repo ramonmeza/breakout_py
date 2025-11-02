@@ -1,11 +1,11 @@
 from pyray import (
-    BLACK,
     begin_drawing,
+    BLACK,
     clear_background,
     close_window,
     end_drawing,
-    init_window,
     get_frame_time,
+    init_window,
     window_should_close,
 )
 

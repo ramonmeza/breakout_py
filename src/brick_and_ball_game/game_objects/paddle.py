@@ -1,4 +1,4 @@
-from pyray import Rectangle, Color, Vector2, draw_rectangle
+from pyray import Color, draw_rectangle, Rectangle, Vector2
 
 from brick_and_ball_game.components import PlayerInputComponent, VelocityComponent
 
