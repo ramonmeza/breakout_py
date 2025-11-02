@@ -1,9 +1,14 @@
 from __future__ import annotations
 from abc import ABC, abstractmethod
 
+from brick_and_ball_game.core.sound_manager import SoundManager
+
 
 class GameState(ABC):
     state_manager: StateManager
+    """Set by StateManager.push()"""
+
+    sound_manager: SoundManager
     """Set by StateManager.push()"""
 
     def load(self) -> None:
@@ -23,11 +28,14 @@ class GameState(ABC):
 
 class StateManager:
     states: list[GameState]
+    sound_manager: SoundManager
 
-    def __init__(self) -> None:
+    def __init__(self, sound_manager: SoundManager) -> None:
         self.states = []
+        self.sound_manager = sound_manager
 
     def push(self, state: GameState) -> None:
+        state.sound_manager = self.sound_manager  # allow access to SoundManager for GameState
         state.state_manager = self  # allow access to StateManager for GameState
         self.states.append(state)
         self.states[-1].load()

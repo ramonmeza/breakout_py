@@ -14,18 +14,21 @@ from pyray import (
 )
 
 from brick_and_ball_game.core.game_state import StateManager
+from brick_and_ball_game.core.sound_manager import SoundManager
 
 
 class App(ABC):
     window_width: int
     window_height: int
     state_manager: StateManager
+    sound_manager: SoundManager
 
     def __init__(self, window_width: int, window_height: int, title: str) -> None:
         self.window_width = window_width
         self.window_height = window_height
         self.window_title = title
-        self.state_manager = StateManager()
+        self.sound_manager = SoundManager()
+        self.state_manager = StateManager(self.sound_manager)
 
     @abstractmethod
     def on_init(self) -> None:
@@ -42,11 +45,13 @@ class App(ABC):
 
     def _load(self) -> None:
         init_window(self.window_width, self.window_height, self.window_title)
+        self.sound_manager.initialize()
         set_exit_key(KeyboardKey.KEY_NULL)
         self.on_init()
 
     def _unload(self) -> None:
         self.state_manager.unload()
+        self.sound_manager.unload()
         close_window()
 
     def run(self) -> None:
