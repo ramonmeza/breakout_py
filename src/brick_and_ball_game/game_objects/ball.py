@@ -4,6 +4,7 @@ from brick_and_ball_game.components import VelocityComponent
 
 
 class Ball:
+    active: bool
     position: Vector2
     radius: float
     color: Color
@@ -17,12 +18,16 @@ class Ball:
         speed: float,
         velocity: Vector2,
     ) -> None:
+        self.active = True
         self.position = position
         self.radius = radius
         self.color = color
         self.velocity = VelocityComponent(speed, velocity, friction=0)
 
     def bounce_off(self, rect: Rectangle) -> bool:
+        if not self.active:
+            return False
+
         # AABB collision check
         if (
             self.position.x + self.radius > rect.x
@@ -61,8 +66,14 @@ class Ball:
         return False
 
     def update(self, delta_time: float) -> None:
+        if not self.active:
+            return
+        
         # update position
         self.position = self.velocity.update(self.position, delta_time)
 
     def draw(self) -> None:
+        if not self.active:
+            return
+        
         draw_circle(int(self.position.x), int(self.position.y), self.radius, self.color)

@@ -1,9 +1,9 @@
 from brick_and_ball_game.core import App
-from brick_and_ball_game.game_states import GameplayState
+from brick_and_ball_game.game_states import GameplayState, MenuState
 
 
 def main() -> int:
-    app: App = App(800, 600, "Brick & Ball!", GameplayState())
+    app: App = App(800, 600, "Brick & Ball!", MenuState())
     app.run()
     return 0
 

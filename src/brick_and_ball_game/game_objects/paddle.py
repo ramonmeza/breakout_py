@@ -1,4 +1,6 @@
-from pyray import Color, draw_rectangle, Rectangle, Vector2
+from pyray import (
+    Color, draw_rectangle, KeyboardKey, Rectangle, Vector2,
+)
 
 from brick_and_ball_game.components import PlayerInputComponent, VelocityComponent
 
@@ -17,6 +19,11 @@ class Paddle:
         self.color = color
         self.velocity = VelocityComponent(speed, Vector2(0.0, 0.0), 5.0)
         self.player_input = PlayerInputComponent()
+        self.player_input.add_axis(
+            "X Axis",
+            KeyboardKey.KEY_LEFT,
+            KeyboardKey.KEY_RIGHT,
+        )
         self.bounds = bounds
 
     @property
@@ -44,7 +51,7 @@ class Paddle:
 
     def update(self, delta_time: float) -> None:
         self.player_input.update(delta_time)
-        self.velocity.x = self.player_input.x_axis
+        self.velocity.x = self.player_input.get_axis_value("X Axis")
         self.position = self.velocity.update(self.position, delta_time)
         self._keep_in_bounds()
 

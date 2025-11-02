@@ -27,7 +27,7 @@ class BrickGrid:
         self.bricks = [Brick(RED if bool(i % 2) else BLUE) for i in range(rows * cols)]
 
     def are_all_bricks_destroyed(self) -> bool:
-        return any(x for x in self.bricks if x.hit_count > 0)
+        return all(brick.hit_count <= 0 for brick in self.bricks)
 
     def get_brick_index_at(self, x: float, y: float) -> int | None:
         # convert world position into grid-space
