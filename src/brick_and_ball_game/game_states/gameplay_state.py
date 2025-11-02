@@ -68,9 +68,7 @@ class GameplayState(GameState):
             ),
         ]
         self.bricks = BrickGrid(
-            rows=4,
-            cols=5,
-            bounding_box=Rectangle(0, 50, self.play_bounds.width, 150)
+            rows=4, cols=5, bounding_box=Rectangle(0, 50, self.play_bounds.width, 150)
         )
 
     @override
@@ -124,17 +122,11 @@ class GameplayState(GameState):
             self.hud.draw(self.player_lives, self.score)
 
     def draw_text_centered(self, msg: str) -> None:
-            font_size: int = 40
-            msg_width: int = measure_text(msg, font_size)
-            msg_x: int = int((self.play_bounds.width / 2) - (msg_width / 2))
-            msg_y: int = int((self.play_bounds.height / 2) - (font_size / 2))
-            draw_text(
-                msg,
-                msg_x,
-                msg_y,
-                font_size,
-                WHITE
-            )
+        font_size: int = 40
+        msg_width: int = measure_text(msg, font_size)
+        msg_x: int = int((self.play_bounds.width / 2) - (msg_width / 2))
+        msg_y: int = int((self.play_bounds.height / 2) - (font_size / 2))
+        draw_text(msg, msg_x, msg_y, font_size, WHITE)
 
     def handle_ball_walls(self, ball: Ball) -> None:
         # left
@@ -205,11 +197,16 @@ class GameplayState(GameState):
     def respawn(self) -> None:
         self.is_playing = True
         self.paddle.velocity.x = 0.0
-        self.paddle.position = Vector2((self.play_bounds.width / 2) - (self.paddle.bounding_box.width / 2), self.paddle.position.y)
+        self.paddle.position = Vector2(
+            (self.play_bounds.width / 2) - (self.paddle.bounding_box.width / 2),
+            self.paddle.position.y,
+        )
         self.balls = [
             Ball(
                 speed=250.0,
-                position=Vector2((self.play_bounds.width / 2), (self.paddle.bounding_box.y - 50)),
+                position=Vector2(
+                    (self.play_bounds.width / 2), (self.paddle.bounding_box.y - 50)
+                ),
                 radius=5.0,
                 color=WHITE,
                 velocity=Vector2(0.0, -1.0),

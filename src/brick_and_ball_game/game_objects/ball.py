@@ -68,12 +68,12 @@ class Ball:
     def update(self, delta_time: float) -> None:
         if not self.active:
             return
-        
+
         # update position
         self.position = self.velocity.update(self.position, delta_time)
 
     def draw(self) -> None:
         if not self.active:
             return
-        
+
         draw_circle(int(self.position.x), int(self.position.y), self.radius, self.color)

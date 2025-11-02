@@ -1,5 +1,9 @@
 from pyray import (
-    Color, draw_rectangle, KeyboardKey, Rectangle, Vector2,
+    Color,
+    draw_rectangle,
+    KeyboardKey,
+    Rectangle,
+    Vector2,
 )
 
 from brick_and_ball_game.components import PlayerInputComponent, VelocityComponent

@@ -8,7 +8,7 @@ from pyray import (
     measure_text,
     Rectangle,
     WHITE,
-    YELLOW
+    YELLOW,
 )
 
 from brick_and_ball_game.core import GameState
@@ -24,24 +24,15 @@ class MenuState(GameState):
     def load(self) -> None:
         self.bounds = Rectangle(0, 0, 800, 600)
         self.player_input = PlayerInputComponent()
-        self.player_input.add_button(
-            "Up",
-            KeyboardKey.KEY_UP
-        )
-        self.player_input.add_button(
-            "Down",
-            KeyboardKey.KEY_DOWN
-        )
-        self.player_input.add_button(
-            "Select",
-            KeyboardKey.KEY_ENTER
-        )
+        self.player_input.add_button("Up", KeyboardKey.KEY_UP)
+        self.player_input.add_button("Down", KeyboardKey.KEY_DOWN)
+        self.player_input.add_button("Select", KeyboardKey.KEY_ENTER)
         self.menu = {
             "Play": lambda: print("play"),
             "Quit": close_window,
         }
         self.selected_option = 0
-    
+
     @override
     def unload(self) -> None:
         pass
@@ -67,6 +58,6 @@ class MenuState(GameState):
                 cur_x,
                 cur_y,
                 font_size,
-                YELLOW if i == self.selected_option else WHITE
+                YELLOW if i == self.selected_option else WHITE,
             )
-            cur_y += font_size + 10 # vertical padding
+            cur_y += font_size + 10  # vertical padding

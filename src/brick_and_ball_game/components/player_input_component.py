@@ -12,6 +12,7 @@ class InputAxis:
     pos: int
     neg: int
     value: float
+
     def __init__(self, pos: pyray.KeyboardKey, neg: pyray.KeyboardKey) -> None:
         self.pos = pos
         self.neg = neg
