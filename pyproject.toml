@@ -1,0 +1,19 @@
+[project]
+name = "brick_game"
+version = "0.1.0"
+description = "Brick & Ball Game!"
+authors = [
+    {name = "Ramon Meza", email = "ramon_meza@live.com"},
+]
+dependencies = ["raylib-sdl>=5.5.0.3"]
+requires-python = ">=3.13"
+readme = "README.md"
+license = {text = "MIT"}
+
+[build-system]
+requires = ["pdm-backend"]
+build-backend = "pdm.backend"
+
+
+[tool.pdm]
+distribution = true
