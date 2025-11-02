@@ -6,7 +6,9 @@ class VelocityComponent:
     velocity: Vector2
     friction: float
 
-    def __init__(self, speed: float, velocity: Vector2 = Vector2(0, 0), friction: float = 0.0) -> None:
+    def __init__(
+        self, speed: float, velocity: Vector2 = Vector2(0, 0), friction: float = 0.0
+    ) -> None:
         self.speed = speed
         self.velocity = velocity
         self.friction = friction
@@ -21,15 +23,15 @@ class VelocityComponent:
     @property
     def x(self) -> float:
         return self.velocity.x
-    
+
     @x.setter
     def x(self, value: float) -> None:
         self.velocity.x = value
-        
+
     @property
     def y(self) -> float:
         return self.velocity.y
-    
+
     @y.setter
     def y(self, value: float) -> None:
         self.velocity.y = value

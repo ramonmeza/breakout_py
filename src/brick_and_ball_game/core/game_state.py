@@ -4,7 +4,7 @@ from abc import ABC, abstractmethod
 class GameState(ABC):
     def load(self) -> None:
         pass
-    
+
     def unload(self) -> None:
         pass
 

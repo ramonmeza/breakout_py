@@ -6,10 +6,7 @@ class PlayerInputComponent:
     x_axis: float
 
     def __init__(self) -> None:
-        self.x_axis_keys = (
-            KeyboardKey.KEY_LEFT,
-            KeyboardKey.KEY_RIGHT
-        )
+        self.x_axis_keys = (KeyboardKey.KEY_LEFT, KeyboardKey.KEY_RIGHT)
         self.x_axis = 0.0
 
     def update(self, delta_time: float) -> None:

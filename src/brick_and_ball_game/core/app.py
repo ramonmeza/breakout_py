@@ -1,12 +1,12 @@
 from pyray import (
-    BLACK, 
+    BLACK,
     begin_drawing,
     clear_background,
-    close_window, 
-    end_drawing, 
+    close_window,
+    end_drawing,
     init_window,
     get_frame_time,
-    window_should_close
+    window_should_close,
 )
 
 from brick_and_ball_game.core.game_state import GameState
@@ -17,7 +17,9 @@ class App:
     window_height: int
     game: GameState
 
-    def __init__(self, window_width: int, window_height: int, title: str, game: GameState) -> None:
+    def __init__(
+        self, window_width: int, window_height: int, title: str, game: GameState
+    ) -> None:
         self.window_width = window_width
         self.window_height = window_height
         self.window_title = title
@@ -33,11 +35,7 @@ class App:
         end_drawing()
 
     def _load(self) -> None:
-        init_window(
-            self.window_width,
-            self.window_height,
-            self.window_title
-        )
+        init_window(self.window_width, self.window_height, self.window_title)
         self.game.load()
 
     def _unload(self) -> None:
