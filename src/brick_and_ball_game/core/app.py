@@ -8,6 +8,8 @@ from pyray import (
     end_drawing,
     get_frame_time,
     init_window,
+    KeyboardKey,
+    set_exit_key,
     window_should_close,
 )
 
@@ -19,9 +21,7 @@ class App(ABC):
     window_height: int
     state_manager: StateManager
 
-    def __init__(
-        self, window_width: int, window_height: int, title: str
-    ) -> None:
+    def __init__(self, window_width: int, window_height: int, title: str) -> None:
         self.window_width = window_width
         self.window_height = window_height
         self.window_title = title
@@ -42,6 +42,7 @@ class App(ABC):
 
     def _load(self) -> None:
         init_window(self.window_width, self.window_height, self.window_title)
+        set_exit_key(KeyboardKey.KEY_NULL)
         self.on_init()
 
     def _unload(self) -> None:

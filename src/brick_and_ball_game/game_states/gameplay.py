@@ -5,6 +5,7 @@ from pyray import (
     check_collision_recs,
     draw_text,
     GREEN,
+    KeyboardKey,
     measure_text,
     Rectangle,
     Vector2,
@@ -13,6 +14,7 @@ from pyray import (
 )
 
 from brick_and_ball_game.core.game_state import GameState
+from brick_and_ball_game.components.player_input_component import PlayerInputComponent
 from brick_and_ball_game.game_objects.ball import Ball
 from brick_and_ball_game.game_objects.bricks import BrickGrid
 from brick_and_ball_game.game_objects.paddle import Paddle
@@ -38,8 +40,12 @@ class GameplayState(GameState):
     ball_hit_bottom: bool
     score: int
 
+    player_input: PlayerInputComponent
+
     @override
     def load(self) -> None:
+        self.player_input = PlayerInputComponent()
+        self.player_input.add_button("Pause", KeyboardKey.KEY_ESCAPE)
         self.score = 0
         self.hud = HUD()
         self.has_won = False
@@ -96,6 +102,12 @@ class GameplayState(GameState):
             if not any(ball.active for ball in self.balls):
                 self.player_life_lost()
                 should_respawn = True
+
+            # pause menu
+            if self.player_input.is_button_pressed("Pause"):
+                from brick_and_ball_game.game_states.menus import PauseMenu
+
+                self.state_manager.push(PauseMenu())
 
         # win condition
         if self.bricks.are_all_bricks_destroyed():

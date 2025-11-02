@@ -1,4 +1,5 @@
 from __future__ import annotations
+from abc import abstractmethod
 from typing import override
 
 from pyray import (
@@ -12,13 +13,17 @@ from pyray import (
 
 from brick_and_ball_game.core.game_state import GameState
 from brick_and_ball_game.components.player_input_component import PlayerInputComponent
-from brick_and_ball_game.game_states.gameplay_state import GameplayState
 
 
 class MenuState(GameState):
     bounds: Rectangle
-    menu: list[str]
+    menu_items: list[str]
+    current_selected_i: int
     player_input: PlayerInputComponent
+
+    def __init__(self, menu_items: list[str]) -> None:
+        super().__init__()
+        self.menu_items = menu_items
 
     @override
     def load(self) -> None:
@@ -27,11 +32,7 @@ class MenuState(GameState):
         self.player_input.add_button("Up", KeyboardKey.KEY_UP)
         self.player_input.add_button("Down", KeyboardKey.KEY_DOWN)
         self.player_input.add_button("Select", KeyboardKey.KEY_ENTER)
-        self.menu = [
-            "Play",
-            "Quit"
-        ]
-        self.selected_option = 0
+        self.current_selected_i = 0
 
     @override
     def unload(self) -> None:
@@ -39,30 +40,40 @@ class MenuState(GameState):
 
     def update(self, delta_time: float) -> None:
         if self.player_input.is_button_pressed("Up"):
-            self.selected_option = (self.selected_option + 1) % len(self.menu)
+            self.current_selected_i = (self.current_selected_i + 1) % len(
+                self.menu_items
+            )
         elif self.player_input.is_button_pressed("Down"):
-            self.selected_option = (self.selected_option - 1) % len(self.menu)
+            self.current_selected_i = (self.current_selected_i - 1) % len(
+                self.menu_items
+            )
 
         if self.player_input.is_button_pressed("Select"):
-            key: str = self.menu[self.selected_option]
-            match self.selected_option:
-                case 0:
-                    # play
-                    self.state_manager.push(GameplayState(self.state_manager))
-                case _:
-                    self.state_manager.pop()
+            self.select(self.current_selected_i)
 
     def draw(self) -> None:
         font_size: int = 30
-        cur_y: int = 100
-        for i, text in enumerate(self.menu):
-            width: int = measure_text(text, font_size)
-            cur_x: int = int((self.bounds.width / 2) + (width / 2))
+        vpadding: int = 10
+        cur_y: int = int(
+            self.bounds.y
+            + (self.bounds.height / 2)
+            - (
+                ((len(self.menu_items) * font_size) + (len(self.menu_items) * vpadding))
+                / 2
+            )
+        )
+        for i, text in enumerate(self.menu_items):
+            text_width: int = measure_text(text, font_size)
+            cur_x: int = int(self.bounds.x + (self.bounds.width / 2) - (text_width / 2))
             draw_text(
                 text,
                 cur_x,
                 cur_y,
                 font_size,
-                YELLOW if i == self.selected_option else WHITE,
+                YELLOW if i == self.current_selected_i else WHITE,
             )
-            cur_y += font_size + 10  # vertical padding
+            cur_y += font_size + vpadding
+
+    @abstractmethod
+    def select(self, selected_option: int) -> None:
+        raise NotImplementedError

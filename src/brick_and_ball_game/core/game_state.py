@@ -4,10 +4,7 @@ from abc import ABC, abstractmethod
 
 class GameState(ABC):
     state_manager: StateManager
-
-    def __init__(self, state_manager: StateManager) -> None:
-        super().__init__()
-        self.state_manager = state_manager
+    """Set by StateManager.push()"""
 
     def load(self) -> None:
         pass
@@ -31,10 +28,7 @@ class StateManager:
         self.states = []
 
     def push(self, state: GameState) -> None:
-        # unload previous state
-        if not self.is_empty():
-            self.states[-1].unload()
-
+        state.state_manager = self  # allow access to StateManager for GameState
         self.states.append(state)
         self.states[-1].load()
 
@@ -48,7 +42,7 @@ class StateManager:
     def update(self, delta_time: float) -> None:
         if not self.is_empty():
             self.states[-1].update(delta_time)
-        
+
     def draw(self) -> None:
         if not self.is_empty():
             self.states[-1].draw()
