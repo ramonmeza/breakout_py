@@ -1,6 +1,6 @@
 from pyray import Color, draw_circle, Rectangle, Vector2
 
-from brick_and_ball_game.components import VelocityComponent
+from brick_and_ball_game.components.velocity_component import VelocityComponent
 
 
 class Ball:

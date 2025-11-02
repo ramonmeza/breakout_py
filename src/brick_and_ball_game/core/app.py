@@ -9,37 +9,38 @@ from pyray import (
     window_should_close,
 )
 
-from brick_and_ball_game.core.game_state import GameState
+from brick_and_ball_game.core.state_manager import StateManager
 
 
 class App:
     window_width: int
     window_height: int
-    game: GameState
+    state_manager: StateManager
 
     def __init__(
-        self, window_width: int, window_height: int, title: str, game: GameState
+        self, window_width: int, window_height: int, title: str
     ) -> None:
         self.window_width = window_width
         self.window_height = window_height
         self.window_title = title
-        self.game = game
+        self.state_manager = StateManager()
 
     def _update(self, delta_time: float) -> None:
-        self.game.update(delta_time)
+        self.state_manager.update(delta_time)
 
     def _draw(self) -> None:
         begin_drawing()
         clear_background(BLACK)
-        self.game.draw()
+        self.state_manager.draw()
         end_drawing()
 
     def _load(self) -> None:
         init_window(self.window_width, self.window_height, self.window_title)
-        self.game.load()
+        from brick_and_ball_game.game_states.menu_state import MenuState
+        self.state_manager.push(MenuState())
 
     def _unload(self) -> None:
-        self.game.unload()
+        self.state_manager.unload()
         close_window()
 
     def run(self) -> None:

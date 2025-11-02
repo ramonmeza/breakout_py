@@ -6,7 +6,8 @@ from pyray import (
     Vector2,
 )
 
-from brick_and_ball_game.components import PlayerInputComponent, VelocityComponent
+from brick_and_ball_game.components.player_input_component import PlayerInputComponent
+from brick_and_ball_game.components.velocity_component import VelocityComponent
 
 
 class Paddle:

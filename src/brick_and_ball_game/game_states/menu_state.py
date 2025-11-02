@@ -11,8 +11,8 @@ from pyray import (
     YELLOW,
 )
 
-from brick_and_ball_game.core import GameState
-from brick_and_ball_game.components import PlayerInputComponent
+from brick_and_ball_game.core.game_state import GameState
+from brick_and_ball_game.components.player_input_component import PlayerInputComponent
 
 
 class MenuState(GameState):

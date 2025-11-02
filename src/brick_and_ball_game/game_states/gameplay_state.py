@@ -13,7 +13,9 @@ from pyray import (
 )
 
 from brick_and_ball_game.core.game_state import GameState
-from brick_and_ball_game.game_objects import Ball, BrickGrid, Paddle
+from brick_and_ball_game.game_objects.ball import Ball
+from brick_and_ball_game.game_objects.bricks import BrickGrid
+from brick_and_ball_game.game_objects.paddle import Paddle
 
 
 class HUD:
