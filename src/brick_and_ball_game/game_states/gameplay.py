@@ -1,6 +1,8 @@
 from __future__ import annotations
 from typing import override
 
+import math
+
 from pyray import (
     check_collision_recs,
     draw_text,
@@ -14,6 +16,7 @@ from pyray import (
 )
 
 from brick_and_ball_game.core.game_state import GameState
+from brick_and_ball_game.core.timer import Timer
 from brick_and_ball_game.components.player_input_component import PlayerInputComponent
 from brick_and_ball_game.game_objects.ball import Ball
 from brick_and_ball_game.game_objects.bricks import BrickGrid
@@ -32,7 +35,7 @@ class GameplayState(GameState):
     balls: list[Ball]
     bricks: BrickGrid
     hud: HUD
-
+    respawn_timer: Timer
     has_won: bool
     has_lost: bool
     is_playing: bool
@@ -44,6 +47,7 @@ class GameplayState(GameState):
 
     @override
     def load(self) -> None:
+        self.respawn_timer = Timer(3.0)
         self.player_input = PlayerInputComponent()
         self.player_input.add_button("Pause", KeyboardKey.KEY_ESCAPE)
         self.score = 0
@@ -84,9 +88,11 @@ class GameplayState(GameState):
         pass
 
     def update(self, delta_time: float) -> None:
-        should_respawn: bool = False
         if self.is_playing:
+            # update paddle
             self.paddle.update(delta_time)
+            
+            # update balls
             for ball in self.balls:
                 ball.update(delta_time)
                 self.handle_ball_walls(ball)
@@ -101,26 +107,26 @@ class GameplayState(GameState):
             # if all balls are inactive
             if not any(ball.active for ball in self.balls):
                 self.player_life_lost()
-                should_respawn = True
+                self.is_playing = False
+                self.respawn_timer.start()
 
-            # pause menu
+            # pause menu (only if playing)
             if self.player_input.is_button_pressed("Pause"):
                 from brick_and_ball_game.game_states.menus import PauseMenu
-
                 self.state_manager.push(PauseMenu())
-
+        else:
+            # repawn timer only updates when not playing
+            self.respawn_timer.update(delta_time)
+            if self.respawn_timer.is_complete():
+                self.respawn()
+        
         # win condition
         if self.bricks.are_all_bricks_destroyed():
             self.win(delta_time)
-            should_respawn = False
 
         # game over condition
         if self.player_lives <= 0:
             self.lose(delta_time)
-            should_respawn = False
-
-        if should_respawn:
-            self.respawn()
 
     def draw(self) -> None:
         self.bricks.draw()
@@ -135,8 +141,10 @@ class GameplayState(GameState):
         else:
             self.hud.draw(self.player_lives, self.score)
 
-    def draw_text_centered(self, msg: str) -> None:
-        font_size: int = 40
+            if self.respawn_timer.is_running():
+                self.draw_text_centered(str(math.ceil(self.respawn_timer.get_counter())))
+
+    def draw_text_centered(self, msg: str, font_size: int = 40) -> None:
         msg_width: int = measure_text(msg, font_size)
         msg_x: int = int((self.play_bounds.width / 2) - (msg_width / 2))
         msg_y: int = int((self.play_bounds.height / 2) - (font_size / 2))
