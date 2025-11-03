@@ -19,7 +19,6 @@ class Ball:
     radius: float
     color: Color
     velocity: VelocityComponent
-    texture: Texture
 
     def __init__(
         self,
@@ -34,9 +33,6 @@ class Ball:
         self.radius = radius
         self.color = color
         self.velocity = VelocityComponent(speed, velocity, friction=0)
-        self.texture = load_texture(r"assets\textures\ballGrey.png")
-        self.texture.width = int(self.radius * 2)
-        self.texture.height = int(self.radius * 2)
 
     def bounce_off(self, rect: Rectangle) -> bool:
         if not self.active:
@@ -85,15 +81,3 @@ class Ball:
 
         # update position
         self.position = self.velocity.update(self.position, delta_time)
-
-    def draw(self) -> None:
-        if not self.active:
-            return
-
-        draw_texture(
-            self.texture,
-            int(self.position.x - self.radius),
-            int(self.position.y - self.radius),
-            WHITE,
-        )
-        # draw_circle(int(self.position.x), int(self.position.y), self.radius, self.color)

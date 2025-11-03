@@ -1,6 +1,5 @@
 from pyray import (
     Color,
-    draw_rectangle,
     KeyboardKey,
     Rectangle,
     Vector2,
@@ -30,6 +29,7 @@ class Paddle:
             KeyboardKey.KEY_RIGHT,
         )
         self.bounds = bounds
+        
 
     @property
     def position(self) -> Vector2:
@@ -59,12 +59,3 @@ class Paddle:
         self.velocity.x = self.player_input.get_axis_value("X Axis")
         self.position = self.velocity.update(self.position, delta_time)
         self._keep_in_bounds()
-
-    def draw(self) -> None:
-        draw_rectangle(
-            int(self.bounding_box.x),
-            int(self.bounding_box.y),
-            int(self.bounding_box.width),
-            int(self.bounding_box.height),
-            self.color,
-        )

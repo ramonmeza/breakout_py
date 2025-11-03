@@ -2,6 +2,7 @@ from __future__ import annotations
 from abc import ABC, abstractmethod
 
 from brick_and_ball_game.core.sound_manager import SoundManager
+from brick_and_ball_game.core.texture_manager import TextureManager
 
 
 class GameState(ABC):
@@ -9,6 +10,9 @@ class GameState(ABC):
     """Set by StateManager.push()"""
 
     sound_manager: SoundManager
+    """Set by StateManager.push()"""
+
+    texture_manager: TextureManager
     """Set by StateManager.push()"""
 
     def load(self) -> None:
@@ -29,10 +33,12 @@ class GameState(ABC):
 class StateManager:
     states: list[GameState]
     sound_manager: SoundManager
+    texture_manager: TextureManager
 
-    def __init__(self, sound_manager: SoundManager) -> None:
+    def __init__(self, sound_manager: SoundManager, texture_manager: TextureManager) -> None:
         self.states = []
         self.sound_manager = sound_manager
+        self.texture_manager = texture_manager
 
     def __getitem__(self, idx: int) -> GameState:
         return self.states[idx]
@@ -41,6 +47,9 @@ class StateManager:
         state.sound_manager = (
             self.sound_manager
         )  # allow access to SoundManager for GameState
+        state.texture_manager = (
+            self.texture_manager
+        )  # allow access to TextureManager for GameState
         state.state_manager = self  # allow access to StateManager for GameState
         self.states.append(state)
         self.states[-1].load()

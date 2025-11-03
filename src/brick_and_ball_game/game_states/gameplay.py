@@ -6,13 +6,14 @@ import math
 
 from pyray import (
     check_collision_recs,
+    draw_rectangle,
     draw_text,
+    draw_texture,
     GREEN,
     KeyboardKey,
     measure_text,
     Rectangle,
     RED,
-    unload_texture,
     Vector2,
     vector2_normalize,
     WHITE,
@@ -80,11 +81,12 @@ class GameplayState(GameState):
             bounds=self.play_bounds,
             speed=350.0,
         )
+        BALL_RADIUS: float = 7.0
         self.balls = [
             Ball(
                 speed=250.0,
                 position=Vector2((self.play_bounds.width / 2), (paddle_y - 50)),
-                radius=7.0,
+                radius=BALL_RADIUS,
                 color=RED,
                 velocity=Vector2(0.0, -1.0),
             ),
@@ -101,10 +103,14 @@ class GameplayState(GameState):
         self.sound_manager.load_sfx("Win", r"assets\sfx\stat_increase.wav")
         self.sound_manager.load_sfx("Life Lost", r"assets\sfx\Explosion_6.wav")
 
+        # load textures
+        self.texture_manager.load_texture("Ball", r"assets\textures\ballGrey.png")
+        self.texture_manager.get_texture("Ball").width = int(BALL_RADIUS * 2)
+        self.texture_manager.get_texture("Ball").height = int(BALL_RADIUS * 2)
+    
     @override
     def unload(self) -> None:
-        for ball in self.balls:
-            unload_texture(ball.texture)
+        pass
 
     def update(self, delta_time: float) -> None:
         match self.current_state:
@@ -139,6 +145,7 @@ class GameplayState(GameState):
                 # pause menu (only if playing)
                 if self.player_input.is_button_pressed("Pause"):
                     from brick_and_ball_game.game_states.menus import PauseMenu
+
                     self.state_manager.push(PauseMenu())
 
             case GameplayStates.STATE_LOST_LIFE:
@@ -179,9 +186,26 @@ class GameplayState(GameState):
 
     def draw(self) -> None:
         self.bricks.draw()
+        # draw balls
         for ball in self.balls:
-            ball.draw()
-        self.paddle.draw()
+            if not ball.active:
+                continue
+
+            draw_texture(
+                self.texture_manager.get_texture("Ball"),
+                int(ball.position.x - ball.radius),
+                int(ball.position.y - ball.radius),
+                WHITE,
+            )
+
+        # draw paddle
+        draw_rectangle(
+            int(self.paddle.bounding_box.x),
+            int(self.paddle.bounding_box.y),
+            int(self.paddle.bounding_box.width),
+            int(self.paddle.bounding_box.height),
+            self.paddle.color,
+        )
 
         # HUD
         self.hud.draw(self.player_lives, self.score)
