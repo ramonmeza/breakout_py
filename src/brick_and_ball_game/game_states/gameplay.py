@@ -113,10 +113,14 @@ class GameplayState(GameState):
         self.sound_manager.load_sfx("Bounce Paddle", r"assets\sfx\Hit_5.wav")
 
         # load bricks
+        self.texture_manager.load_texture(
+            "Brick", r"assets\textures\element_grey_rectangle.png"
+        )
         self.bricks = BrickGrid(
             rows=BRICK_ROWS,
             cols=BRICK_COLS,
             bounding_box=Rectangle(0, 50, self.play_bounds.width, 150),
+            texture=self.texture_manager.get_texture("Brick"),
         )
 
         # bind input

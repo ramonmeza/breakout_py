@@ -1,4 +1,4 @@
-from pyray import BLUE, Color, draw_rectangle, Rectangle, RED
+from pyray import BLUE, Color, draw_rectangle, draw_texture, Rectangle, RED, Texture
 
 
 class Brick:
@@ -15,24 +15,29 @@ class BrickGrid:
     bricks: list[Brick]
     rows: int
     cols: int
-    brick_width: float
-    brick_height: float
+    brick_width: int
+    brick_height: int
 
-    def __init__(self, rows: int, cols: int, bounding_box: Rectangle) -> None:
+    def __init__(
+        self, rows: int, cols: int, bounding_box: Rectangle, texture: Texture
+    ) -> None:
         self.bounding_box = bounding_box
         self.rows = rows
         self.cols = cols
-        self.brick_width = bounding_box.width / self.cols
-        self.brick_height = bounding_box.height / self.rows
+        self.brick_width = int(bounding_box.width / self.cols)
+        self.brick_height = int(bounding_box.height / self.rows)
         self.bricks = [Brick(RED if bool(i % 2) else BLUE) for i in range(rows * cols)]
+        self.texture = texture
+        self.texture.width = self.brick_width
+        self.texture.height = self.brick_height
 
     def are_all_bricks_destroyed(self) -> bool:
         return all(brick.hit_count <= 0 for brick in self.bricks)
 
     def get_brick_index_at(self, x: float, y: float) -> int | None:
         # convert world position into grid-space
-        rel_x = x - self.bounding_box.x
-        rel_y = y - self.bounding_box.y
+        rel_x: float = x - self.bounding_box.x
+        rel_y: float = y - self.bounding_box.y
 
         # check if point is within grid bounds
         if (
@@ -44,11 +49,11 @@ class BrickGrid:
             return None  # OOB
 
         # compute row and column
-        col = int(rel_x // self.brick_width)
-        row = int(rel_y // self.brick_height)
+        col: int = int(rel_x // self.brick_width)
+        row: int = int(rel_y // self.brick_height)
 
         # compute flat list index
-        index = row * self.cols + col
+        index: int = row * self.cols + col
         if 0 <= index < len(self.bricks):
             return index
         return None
@@ -58,15 +63,9 @@ class BrickGrid:
             if brick.hit_count <= 0:
                 continue  # skip destroyed bricks
 
-            row = i // self.cols
-            col = i % self.cols
-            x = self.bounding_box.x + col * self.brick_width
-            y = self.bounding_box.y + row * self.brick_height
+            row: int = i // self.cols
+            col: int = i % self.cols
+            x: int = int(self.bounding_box.x + col * self.brick_width)
+            y: int = int(self.bounding_box.y + row * self.brick_height)
 
-            draw_rectangle(
-                int(x),
-                int(y),
-                int(self.brick_width - 1),  # leave 1px gap
-                int(self.brick_height - 1),
-                brick.color,
-            )
+            draw_texture(self.texture, x, y, brick.color)
