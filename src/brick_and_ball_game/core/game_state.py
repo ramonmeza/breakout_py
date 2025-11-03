@@ -34,6 +34,9 @@ class StateManager:
         self.states = []
         self.sound_manager = sound_manager
 
+    def __getitem__(self, idx: int) -> GameState:
+        return self.states[idx]
+
     def push(self, state: GameState) -> None:
         state.sound_manager = (
             self.sound_manager

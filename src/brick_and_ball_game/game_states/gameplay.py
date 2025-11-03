@@ -1,4 +1,5 @@
 from __future__ import annotations
+from enum import IntEnum
 from typing import override
 
 import math
@@ -10,6 +11,8 @@ from pyray import (
     KeyboardKey,
     measure_text,
     Rectangle,
+    RED,
+    unload_texture,
     Vector2,
     vector2_normalize,
     WHITE,
@@ -21,6 +24,14 @@ from brick_and_ball_game.components.player_input_component import PlayerInputCom
 from brick_and_ball_game.game_objects.ball import Ball
 from brick_and_ball_game.game_objects.bricks import BrickGrid
 from brick_and_ball_game.game_objects.paddle import Paddle
+
+
+class GameplayStates(IntEnum):
+    STATE_STARTING = 0
+    STATE_PLAYING = 1
+    STATE_LOST_LIFE = 2
+    STATE_GAME_WON = 3
+    STATE_GAME_LOST = 4
 
 
 class HUD:
@@ -35,28 +46,27 @@ class GameplayState(GameState):
     balls: list[Ball]
     bricks: BrickGrid
     hud: HUD
-    respawn_timer: Timer
+    game_timer: Timer
     has_won: bool
     has_lost: bool
-    is_playing: bool
     player_lives: int
     ball_hit_bottom: bool
     score: int
-
+    current_state: int
     player_input: PlayerInputComponent
 
     @override
     def load(self) -> None:
-        self.respawn_timer = Timer(3.0)
+        self.game_timer = Timer(1.0)
         self.player_input = PlayerInputComponent()
         self.player_input.add_button("Pause", KeyboardKey.KEY_ESCAPE)
         self.score = 0
         self.hud = HUD()
         self.has_won = False
         self.has_lost = False
-        self.is_playing = True
-        self.player_lives = 3
+        self.player_lives = 1
         self.ball_hit_bottom = False
+        self.current_state = GameplayStates.STATE_STARTING
 
         self.play_bounds = Rectangle(0, 0, 800, 600)
         paddle_width: int = 75
@@ -74,13 +84,13 @@ class GameplayState(GameState):
             Ball(
                 speed=250.0,
                 position=Vector2((self.play_bounds.width / 2), (paddle_y - 50)),
-                radius=5.0,
-                color=WHITE,
+                radius=7.0,
+                color=RED,
                 velocity=Vector2(0.0, -1.0),
             ),
         ]
         self.bricks = BrickGrid(
-            rows=2, cols=2, bounding_box=Rectangle(0, 50, self.play_bounds.width, 150)
+            rows=3, cols=5, bounding_box=Rectangle(0, 50, self.play_bounds.width, 150)
         )
 
         # load audio
@@ -93,49 +103,79 @@ class GameplayState(GameState):
 
     @override
     def unload(self) -> None:
-        pass
+        for ball in self.balls:
+            unload_texture(ball.texture)
 
     def update(self, delta_time: float) -> None:
-        if self.is_playing:
-            # update paddle
-            self.paddle.update(delta_time)
+        match self.current_state:
+            case GameplayStates.STATE_STARTING:
+                if self.game_timer.is_complete():
+                    self.current_state = GameplayStates.STATE_PLAYING
+                    self.game_timer.reset()
+                    self.game_timer.stop()
+                elif not self.game_timer.is_running():
+                    self.game_timer.start()
 
-            # update balls
-            for ball in self.balls:
-                ball.update(delta_time)
-                self.handle_ball_walls(ball)
-                self.handle_ball_bricks(ball)
-                self.handle_ball_paddle(ball)
+            case GameplayStates.STATE_PLAYING:
+                self.paddle.update(delta_time)
+                for ball in self.balls:
+                    ball.update(delta_time)
+                    self.handle_ball_walls(ball)
+                    self.handle_ball_bricks(ball)
+                    self.handle_ball_paddle(ball)
+                    # if ball hit bottom, make it inactive
+                    if self.ball_hit_bottom:
+                        self.ball_hit_bottom = False
+                        ball.active = False
 
-                # if ball hit bottom, make it inactive
-                if self.ball_hit_bottom:
-                    self.ball_hit_bottom = False
-                    ball.active = False
+                # if all balls are inactive
+                if not any(ball.active for ball in self.balls):
+                    self.current_state = GameplayStates.STATE_LOST_LIFE
 
-            # if all balls are inactive
-            if not any(ball.active for ball in self.balls):
-                self.player_life_lost()
-                self.is_playing = False
-                self.respawn_timer.start()
+                # check win condition
+                if self.bricks.are_all_bricks_destroyed():
+                    self.current_state = GameplayStates.STATE_GAME_WON
 
-            # pause menu (only if playing)
-            if self.player_input.is_button_pressed("Pause"):
-                from brick_and_ball_game.game_states.menus import PauseMenu
+                # pause menu (only if playing)
+                if self.player_input.is_button_pressed("Pause"):
+                    from brick_and_ball_game.game_states.menus import PauseMenu
+                    self.state_manager.push(PauseMenu())
 
-                self.state_manager.push(PauseMenu())
-        elif not self.has_lost or not self.has_won:
-            # repawn timer only updates when not playing
-            self.respawn_timer.update(delta_time)
-            if self.respawn_timer.is_complete():
-                self.respawn()
+            case GameplayStates.STATE_LOST_LIFE:
+                self.sound_manager.play_sfx("Life Lost")
+                self.player_lives -= 1
+                self.current_state = GameplayStates.STATE_STARTING
+                # game over condition
+                if self.player_lives <= 0:
+                    self.current_state = GameplayStates.STATE_GAME_LOST
+                else:
+                    self.respawn()
 
-        # win condition
-        if self.bricks.are_all_bricks_destroyed():
-            self.win()
+            case GameplayStates.STATE_GAME_WON:
+                if not self.has_won:
+                    self.sound_manager.play_sfx("Win")
+                    self.has_won = True
+                    from brick_and_ball_game.game_states.menus import GameOverMenu
 
-        # game over condition
-        if self.player_lives <= 0:
-            self.lose()
+                    self.state_manager.push(
+                        GameOverMenu(has_won=True, score=self.score)
+                    )
+
+            case GameplayStates.STATE_GAME_LOST:
+                if not self.has_lost:
+                    self.sound_manager.play_sfx("Lose")
+                    self.has_lost = True
+                    from brick_and_ball_game.game_states.menus import GameOverMenu
+
+                    self.state_manager.push(
+                        GameOverMenu(has_won=False, score=self.score)
+                    )
+
+            case _:
+                pass
+
+        # update timers
+        self.game_timer.update(delta_time)
 
     def draw(self) -> None:
         self.bricks.draw()
@@ -143,22 +183,19 @@ class GameplayState(GameState):
             ball.draw()
         self.paddle.draw()
 
-        if self.has_won:
-            self.draw_text_centered("YOU WIN!")
-        elif self.has_lost:
-            self.draw_text_centered("YOU LOSE.")
-        else:
-            self.hud.draw(self.player_lives, self.score)
+        # HUD
+        self.hud.draw(self.player_lives, self.score)
 
-            if self.respawn_timer.is_running():
-                self.draw_text_centered(
-                    str(math.ceil(self.respawn_timer.get_counter()))
-                )
+        # count-down
+        if self.game_timer.is_running():
+            self.draw_text_centered(str(math.ceil(self.game_timer.get_counter())))
 
-    def draw_text_centered(self, msg: str, font_size: int = 40) -> None:
+    def draw_text_centered(
+        self, msg: str, font_size: int = 40, offset_x: int = 0, offset_y: int = 0
+    ) -> None:
         msg_width: int = measure_text(msg, font_size)
-        msg_x: int = int((self.play_bounds.width / 2) - (msg_width / 2))
-        msg_y: int = int((self.play_bounds.height / 2) - (font_size / 2))
+        msg_x: int = int((self.play_bounds.width / 2) - (msg_width / 2)) + offset_x
+        msg_y: int = int((self.play_bounds.height / 2) - (font_size / 2)) + offset_y
         draw_text(msg, msg_x, msg_y, font_size, WHITE)
 
     def handle_ball_walls(self, ball: Ball) -> None:
@@ -224,16 +261,11 @@ class GameplayState(GameState):
             ball_dir = vector2_normalize(ball_dir)
             ball.velocity.x = ball_dir.x
             ball.velocity.y = ball_dir.y
+            ball.velocity.speed += 25.0
             self.score += 5
             self.sound_manager.play_sfx("Bounce Paddle")
 
-    def player_life_lost(self) -> None:
-        if self.is_playing:
-            self.sound_manager.play_sfx("Life Lost")
-            self.player_lives -= 1
-
     def respawn(self) -> None:
-        self.is_playing = True
         self.paddle.velocity.x = 0.0
         self.paddle.position = Vector2(
             (self.play_bounds.width / 2) - (self.paddle.bounding_box.width / 2),
@@ -250,15 +282,3 @@ class GameplayState(GameState):
                 velocity=Vector2(0.0, -1.0),
             ),
         ]
-
-    def win(self) -> None:
-        if self.is_playing:
-            self.sound_manager.play_sfx("Win")
-            self.is_playing = False
-            self.has_won = True
-
-    def lose(self) -> None:
-        if self.is_playing:
-            self.sound_manager.play_sfx("Lose")
-            self.is_playing = False
-            self.has_lost = True

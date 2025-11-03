@@ -33,9 +33,9 @@ class MenuState(GameState):
         self.player_input.add_button("Down", KeyboardKey.KEY_DOWN)
         self.player_input.add_button("Select", KeyboardKey.KEY_ENTER)
         self.current_selected_i = 0
-        self.sound_manager.load_sfx("Click", "assets/sfx/switch4.ogg", volume=0.5)
-        self.sound_manager.load_sfx("Clack", "assets/sfx/switch5.ogg", volume=0.5)
-        self.sound_manager.load_sfx("Select", "assets/sfx/switch31.ogg", volume=0.5)
+        self.sound_manager.load_sfx("Click", r"assets\sfx\switch4.ogg", volume=0.5)
+        self.sound_manager.load_sfx("Clack", r"assets\sfx\switch5.ogg", volume=0.5)
+        self.sound_manager.load_sfx("Select", r"assets\sfx\switch31.ogg", volume=0.5)
 
     @override
     def unload(self) -> None:
