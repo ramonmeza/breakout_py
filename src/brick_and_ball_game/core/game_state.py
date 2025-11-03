@@ -35,7 +35,9 @@ class StateManager:
     sound_manager: SoundManager
     texture_manager: TextureManager
 
-    def __init__(self, sound_manager: SoundManager, texture_manager: TextureManager) -> None:
+    def __init__(
+        self, sound_manager: SoundManager, texture_manager: TextureManager
+    ) -> None:
         self.states = []
         self.sound_manager = sound_manager
         self.texture_manager = texture_manager

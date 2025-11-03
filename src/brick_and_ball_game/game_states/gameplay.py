@@ -6,7 +6,6 @@ import math
 
 from pyray import (
     check_collision_recs,
-    draw_rectangle,
     draw_text,
     draw_texture,
     GREEN,
@@ -25,6 +24,14 @@ from brick_and_ball_game.components.player_input_component import PlayerInputCom
 from brick_and_ball_game.game_objects.ball import Ball
 from brick_and_ball_game.game_objects.bricks import BrickGrid
 from brick_and_ball_game.game_objects.paddle import Paddle
+
+
+RESPAWN_TIMER: float = 3.0
+BALL_RADIUS: float = 7.0
+BALL_SPEED: float = 300.0
+PLAYER_LIVES: int = 3
+BRICK_ROWS: int = 3
+BRICK_COLS: int = 5
 
 
 class GameplayStates(IntEnum):
@@ -58,18 +65,17 @@ class GameplayState(GameState):
 
     @override
     def load(self) -> None:
-        self.game_timer = Timer(1.0)
-        self.player_input = PlayerInputComponent()
-        self.player_input.add_button("Pause", KeyboardKey.KEY_ESCAPE)
+        self.game_timer = Timer(RESPAWN_TIMER)
         self.score = 0
         self.hud = HUD()
         self.has_won = False
         self.has_lost = False
-        self.player_lives = 1
+        self.player_lives = PLAYER_LIVES
         self.ball_hit_bottom = False
         self.current_state = GameplayStates.STATE_STARTING
-
         self.play_bounds = Rectangle(0, 0, 800, 600)
+
+        # load paddle
         paddle_width: int = 75
         paddle_height: int = 10
         paddle_dist_from_bottom: int = 100
@@ -81,33 +87,47 @@ class GameplayState(GameState):
             bounds=self.play_bounds,
             speed=350.0,
         )
-        BALL_RADIUS: float = 7.0
+        self.texture_manager.load_texture("Paddle", r"assets\textures\paddleBlue.png")
+        self.texture_manager.get_texture("Paddle").width = int(
+            self.paddle.bounding_box.width
+        )
+        self.texture_manager.get_texture("Paddle").height = int(
+            self.paddle.bounding_box.height
+        )
+
+        # create balls
         self.balls = [
             Ball(
-                speed=250.0,
+                speed=BALL_SPEED,
                 position=Vector2((self.play_bounds.width / 2), (paddle_y - 50)),
                 radius=BALL_RADIUS,
                 color=RED,
                 velocity=Vector2(0.0, -1.0),
             ),
         ]
-        self.bricks = BrickGrid(
-            rows=3, cols=5, bounding_box=Rectangle(0, 50, self.play_bounds.width, 150)
-        )
-
-        # load audio
+        self.texture_manager.load_texture("Ball", r"assets\textures\ballGrey.png")
+        self.texture_manager.get_texture("Ball").width = int(BALL_RADIUS * 2)
+        self.texture_manager.get_texture("Ball").height = int(BALL_RADIUS * 2)
         self.sound_manager.load_sfx("Bounce Wall", r"assets\sfx\Hit_4.wav")
         self.sound_manager.load_sfx("Bounce Brick", r"assets\sfx\Coin_2.wav")
         self.sound_manager.load_sfx("Bounce Paddle", r"assets\sfx\Hit_5.wav")
+
+        # load bricks
+        self.bricks = BrickGrid(
+            rows=BRICK_ROWS,
+            cols=BRICK_COLS,
+            bounding_box=Rectangle(0, 50, self.play_bounds.width, 150),
+        )
+
+        # bind input
+        self.player_input = PlayerInputComponent()
+        self.player_input.add_button("Pause", KeyboardKey.KEY_ESCAPE)
+
+        # load audio
         self.sound_manager.load_sfx("Lose", r"assets\sfx\lose_1.wav")
         self.sound_manager.load_sfx("Win", r"assets\sfx\stat_increase.wav")
         self.sound_manager.load_sfx("Life Lost", r"assets\sfx\Explosion_6.wav")
 
-        # load textures
-        self.texture_manager.load_texture("Ball", r"assets\textures\ballGrey.png")
-        self.texture_manager.get_texture("Ball").width = int(BALL_RADIUS * 2)
-        self.texture_manager.get_texture("Ball").height = int(BALL_RADIUS * 2)
-    
     @override
     def unload(self) -> None:
         pass
@@ -199,12 +219,11 @@ class GameplayState(GameState):
             )
 
         # draw paddle
-        draw_rectangle(
+        draw_texture(
+            self.texture_manager.get_texture("Paddle"),
             int(self.paddle.bounding_box.x),
             int(self.paddle.bounding_box.y),
-            int(self.paddle.bounding_box.width),
-            int(self.paddle.bounding_box.height),
-            self.paddle.color,
+            WHITE,
         )
 
         # HUD
@@ -244,7 +263,6 @@ class GameplayState(GameState):
         # bottom
         if ball.position.y + ball.radius > self.play_bounds.y + self.play_bounds.height:
             self.ball_hit_bottom = True
-            # sfx?
 
     def handle_ball_bricks(self, ball: Ball) -> None:
         ball_coll: Rectangle = Rectangle(

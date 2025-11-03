@@ -29,7 +29,6 @@ class Paddle:
             KeyboardKey.KEY_RIGHT,
         )
         self.bounds = bounds
-        
 
     @property
     def position(self) -> Vector2:
