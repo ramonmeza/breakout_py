@@ -80,8 +80,16 @@ class GameplayState(GameState):
             ),
         ]
         self.bricks = BrickGrid(
-            rows=4, cols=5, bounding_box=Rectangle(0, 50, self.play_bounds.width, 150)
+            rows=2, cols=2, bounding_box=Rectangle(0, 50, self.play_bounds.width, 150)
         )
+
+        # load audio
+        self.sound_manager.load_sfx("Bounce Wall", r"assets\sfx\Hit_4.wav")
+        self.sound_manager.load_sfx("Bounce Brick", r"assets\sfx\Coin_2.wav")
+        self.sound_manager.load_sfx("Bounce Paddle", r"assets\sfx\Hit_5.wav")
+        self.sound_manager.load_sfx("Lose", r"assets\sfx\lose_1.wav")
+        self.sound_manager.load_sfx("Win", r"assets\sfx\stat_increase.wav")
+        self.sound_manager.load_sfx("Life Lost", r"assets\sfx\Explosion_6.wav")
 
     @override
     def unload(self) -> None:
@@ -114,7 +122,7 @@ class GameplayState(GameState):
             if self.player_input.is_button_pressed("Pause"):
                 from brick_and_ball_game.game_states.menus import PauseMenu
                 self.state_manager.push(PauseMenu())
-        else:
+        elif not self.has_lost or not self.has_won:
             # repawn timer only updates when not playing
             self.respawn_timer.update(delta_time)
             if self.respawn_timer.is_complete():
@@ -122,11 +130,11 @@ class GameplayState(GameState):
         
         # win condition
         if self.bricks.are_all_bricks_destroyed():
-            self.win(delta_time)
+            self.win()
 
         # game over condition
         if self.player_lives <= 0:
-            self.lose(delta_time)
+            self.lose()
 
     def draw(self) -> None:
         self.bricks.draw()
@@ -155,22 +163,24 @@ class GameplayState(GameState):
         if ball.position.x - ball.radius < self.play_bounds.x:
             ball.velocity.x *= -1
             ball.position.x = self.play_bounds.x + ball.radius
+            self.sound_manager.play_sfx("Bounce Wall")
 
         # right
         if ball.position.x + ball.radius > self.play_bounds.x + self.play_bounds.width:
             ball.velocity.x *= -1
             ball.position.x = self.play_bounds.x + self.play_bounds.width - ball.radius
+            self.sound_manager.play_sfx("Bounce Wall")
 
         # top
         if ball.position.y - ball.radius < self.play_bounds.y:
             ball.velocity.y *= -1
             ball.position.y = self.play_bounds.y + ball.radius
+            self.sound_manager.play_sfx("Bounce Wall")
 
         # bottom
         if ball.position.y + ball.radius > self.play_bounds.y + self.play_bounds.height:
-            # ball.velocity.y *= -1
-            # ball.position.y = self.play_bounds.y + self.play_bounds.height - ball.radius
             self.ball_hit_bottom = True
+            # sfx?
 
     def handle_ball_bricks(self, ball: Ball) -> None:
         ball_coll: Rectangle = Rectangle(
@@ -196,7 +206,8 @@ class GameplayState(GameState):
 
                     if ball.bounce_off(brick_rect):
                         brick.hit_count -= 1
-                        self.score += 10
+                        self.score += 10            
+                        self.sound_manager.play_sfx("Bounce Brick")
 
     def handle_ball_paddle(self, ball: Ball) -> None:
         if ball.bounce_off(self.paddle.bounding_box):
@@ -210,11 +221,13 @@ class GameplayState(GameState):
             ball_dir = vector2_normalize(ball_dir)
             ball.velocity.x = ball_dir.x
             ball.velocity.y = ball_dir.y
-
             self.score += 5
+            self.sound_manager.play_sfx("Bounce Paddle")
 
     def player_life_lost(self) -> None:
-        self.player_lives -= 1
+        if self.is_playing:
+            self.sound_manager.play_sfx("Life Lost")
+            self.player_lives -= 1
 
     def respawn(self) -> None:
         self.is_playing = True
@@ -235,10 +248,14 @@ class GameplayState(GameState):
             ),
         ]
 
-    def win(self, delta_time: float) -> None:
-        self.is_playing = False
-        self.has_won = True
+    def win(self) -> None:
+        if self.is_playing:
+            self.sound_manager.play_sfx("Win")
+            self.is_playing = False
+            self.has_won = True
 
-    def lose(self, delta_time: float) -> None:
-        self.is_playing = False
-        self.has_lost = True
+    def lose(self) -> None:
+        if self.is_playing:
+            self.sound_manager.play_sfx("Lose")
+            self.is_playing = False
+            self.has_lost = True
