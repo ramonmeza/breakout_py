@@ -99,7 +99,7 @@ class GameplayState(GameState):
         if self.is_playing:
             # update paddle
             self.paddle.update(delta_time)
-            
+
             # update balls
             for ball in self.balls:
                 ball.update(delta_time)
@@ -121,13 +121,14 @@ class GameplayState(GameState):
             # pause menu (only if playing)
             if self.player_input.is_button_pressed("Pause"):
                 from brick_and_ball_game.game_states.menus import PauseMenu
+
                 self.state_manager.push(PauseMenu())
         elif not self.has_lost or not self.has_won:
             # repawn timer only updates when not playing
             self.respawn_timer.update(delta_time)
             if self.respawn_timer.is_complete():
                 self.respawn()
-        
+
         # win condition
         if self.bricks.are_all_bricks_destroyed():
             self.win()
@@ -150,7 +151,9 @@ class GameplayState(GameState):
             self.hud.draw(self.player_lives, self.score)
 
             if self.respawn_timer.is_running():
-                self.draw_text_centered(str(math.ceil(self.respawn_timer.get_counter())))
+                self.draw_text_centered(
+                    str(math.ceil(self.respawn_timer.get_counter()))
+                )
 
     def draw_text_centered(self, msg: str, font_size: int = 40) -> None:
         msg_width: int = measure_text(msg, font_size)
@@ -206,7 +209,7 @@ class GameplayState(GameState):
 
                     if ball.bounce_off(brick_rect):
                         brick.hit_count -= 1
-                        self.score += 10            
+                        self.score += 10
                         self.sound_manager.play_sfx("Bounce Brick")
 
     def handle_ball_paddle(self, ball: Ball) -> None:

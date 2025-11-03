@@ -35,7 +35,9 @@ class StateManager:
         self.sound_manager = sound_manager
 
     def push(self, state: GameState) -> None:
-        state.sound_manager = self.sound_manager  # allow access to SoundManager for GameState
+        state.sound_manager = (
+            self.sound_manager
+        )  # allow access to SoundManager for GameState
         state.state_manager = self  # allow access to StateManager for GameState
         self.states.append(state)
         self.states[-1].load()

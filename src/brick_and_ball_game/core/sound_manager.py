@@ -1,4 +1,11 @@
-from pyray import init_audio_device, load_sound, play_sound, set_sound_volume, Sound, unload_sound
+from pyray import (
+    init_audio_device,
+    load_sound,
+    play_sound,
+    set_sound_volume,
+    Sound,
+    unload_sound,
+)
 
 
 class SoundManager:
