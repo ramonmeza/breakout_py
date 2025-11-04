@@ -9,6 +9,7 @@ from pyray import (
     set_music_volume,
     set_sound_volume,
     Sound,
+    stop_music_stream,
     unload_music_stream,
     unload_sound,
     update_music_stream,
@@ -58,14 +59,17 @@ class SoundManager:
         if bgm_name not in self.bgm:
             return
 
-        # song already playing
-        if is_music_stream_playing(self.bgm[bgm_name]):
+        # song is currently playing
+        if self.current_bgm == bgm_name and is_music_stream_playing(self.bgm[self.current_bgm]):
             return
-
-        # play
+        
+        # stop current song
+        if self.current_bgm is not None:
+            stop_music_stream(self.bgm[self.current_bgm])
+    
+        # play song
         self.current_bgm = bgm_name
         play_music_stream(self.bgm[bgm_name])
-        # todo: do i need to stop already playing music if there is any?
 
     def update(self) -> None:
         if self.current_bgm is not None:

@@ -5,9 +5,11 @@ from typing import override
 from pyray import (
     Color,
     draw_text,
+    draw_triangle,
     KeyboardKey,
     measure_text,
     Rectangle,
+    Vector2,
 )
 
 from brick_and_ball_game.core.game_state import GameState
@@ -67,21 +69,29 @@ class MenuState(GameState):
                 / 2
             )
         )
+
         for i, text in enumerate(self.menu_items):
             text_width: int = measure_text(text, font_size)
             cur_x: int = int(self.bounds.x + (self.bounds.width / 2) - (text_width / 2))
+
+            # draw selection cursor
+            title_color: Color = Color(255, 255, 255, 255)
+            if i == self.current_selected_i:
+                title_color = Color(255, 255, 0, 255)
+                draw_text(
+                    ">", cur_x - 15, cur_y, 30, title_color
+                )
+            
+            # draw menu option title
             draw_text(
                 text,
                 cur_x,
                 cur_y,
                 font_size,
-                (
-                    Color(255, 255, 0, 255)
-                    if i == self.current_selected_i
-                    else Color(255, 255, 255, 255)
-                ),
+                title_color,
             )
             cur_y += font_size + vpadding
+
 
     @abstractmethod
     def select(self, selected_option: int) -> None:
