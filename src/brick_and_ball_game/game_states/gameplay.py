@@ -108,9 +108,13 @@ class GameplayState(GameState):
         self.texture_manager.load_texture("Ball", r"assets\textures\ballGrey.png")
         self.texture_manager.get_texture("Ball").width = int(BALL_RADIUS * 2)
         self.texture_manager.get_texture("Ball").height = int(BALL_RADIUS * 2)
-        self.sound_manager.load_sfx("Bounce Wall", r"assets\sfx\Hit_4.wav")
-        self.sound_manager.load_sfx("Bounce Brick", r"assets\sfx\Coin_2.wav")
-        self.sound_manager.load_sfx("Bounce Paddle", r"assets\sfx\Hit_5.wav")
+        self.sound_manager.load_sfx("Bounce Wall", r"assets\sfx\Hit_4.wav", volume=0.35)
+        self.sound_manager.load_sfx(
+            "Bounce Brick", r"assets\sfx\Coin_2.wav", volume=0.35
+        )
+        self.sound_manager.load_sfx(
+            "Bounce Paddle", r"assets\sfx\Hit_5.wav", volume=0.35
+        )
 
         # load bricks
         self.texture_manager.load_texture(
