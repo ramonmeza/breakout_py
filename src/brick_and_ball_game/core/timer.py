@@ -3,7 +3,7 @@ class Timer:
     _counter: float
     _running: bool
 
-    def __init__(self, duration: float = 3.0, start: bool = False) -> None:
+    def __init__(self, duration: float, start: bool = False) -> None:
         self.duration = duration
         self._counter = duration
         self._running = start

@@ -6,20 +6,19 @@ import math
 
 from pyray import (
     check_collision_recs,
+    Color,
+    draw_circle,
     draw_text,
     draw_texture,
-    GREEN,
     KeyboardKey,
-    measure_text,
     Rectangle,
-    RED,
     Vector2,
     vector2_normalize,
-    WHITE,
 )
 
 from brick_and_ball_game.core.game_state import GameState
 from brick_and_ball_game.core.timer import Timer
+from brick_and_ball_game.core.utils import draw_text_centered
 from brick_and_ball_game.components.player_input_component import PlayerInputComponent
 from brick_and_ball_game.game_objects.ball import Ball
 from brick_and_ball_game.game_objects.bricks import BrickGrid
@@ -28,6 +27,8 @@ from brick_and_ball_game.game_objects.paddle import Paddle
 
 BALL_OFF_BRICK_SCORE: int = 15
 BALL_OFF_PADDLE_SCORE: int = 25
+BALL_COLOR: Color = Color(0, 50, 200, 255)
+BALL_INIT_Y_OFFSET: int = 75
 RESPAWN_TIMER: float = 3.0
 BALL_RADIUS: float = 7.0
 BALL_SPEED: float = 300.0
@@ -49,8 +50,8 @@ class GameplayStates(IntEnum):
 
 class HUD:
     def draw(self, lives: int, score: int) -> None:
-        draw_text(f"LIVES: {lives}", 10, 10, 20, WHITE)
-        draw_text(f"SCORE: {score}", 10, 40, 20, WHITE)
+        draw_text(f"LIVES: {lives}", 10, 10, 20, Color(255, 255, 255, 255))
+        draw_text(f"SCORE: {score}", 10, 40, 20, Color(255, 255, 255, 255))
 
 
 class GameplayState(GameState):
@@ -88,7 +89,7 @@ class GameplayState(GameState):
         paddle_y: float = self.play_bounds.height - paddle_dist_from_bottom
         self.paddle = Paddle(
             bounding_box=Rectangle(paddle_x, paddle_y, paddle_width, paddle_height),
-            color=GREEN,
+            color=Color(255, 255, 255, 255),
             bounds=self.play_bounds,
             speed=350.0,
         )
@@ -104,10 +105,10 @@ class GameplayState(GameState):
         self.balls = [
             Ball(
                 speed=BALL_SPEED,
-                position=Vector2((self.play_bounds.width / 2), (paddle_y - 50)),
+                position=Vector2((self.play_bounds.width / 2), (paddle_y - BALL_INIT_Y_OFFSET)),
                 radius=BALL_RADIUS,
-                color=RED,
-                velocity=BALL_INIT_VELOCITY,
+                color=BALL_COLOR,
+                velocity=Vector2(BALL_INIT_VELOCITY.x, BALL_INIT_VELOCITY.y),
             ),
         ]
         self.texture_manager.load_texture("Ball", r"assets\textures\ballGrey.png")
@@ -220,42 +221,43 @@ class GameplayState(GameState):
         # update timers
         self.game_timer.update(delta_time)
 
-    def draw(self) -> None:
-        self.bricks.draw()
-        # draw balls
+    def draw_balls(self) -> None:
         for ball in self.balls:
             if not ball.active:
                 continue
 
+            # draw trail
+            for i, pos in enumerate(ball.trail):
+                fade: int = int(128 * (i / len(ball.trail)))  # 0–255 fade alpha
+                draw_circle(
+                    int(pos.x),
+                    int(pos.y),
+                    ball.radius * (i / len(ball.trail)),  # smaller dots behind
+                    Color(ball.color.r, ball.color.g, ball.color.b, fade),
+                )
+
+            # draw main ball
             draw_texture(
                 self.texture_manager.get_texture("Ball"),
                 int(ball.position.x - ball.radius),
                 int(ball.position.y - ball.radius),
-                WHITE,
+                ball.color,
             )
 
-        # draw paddle
+    def draw(self) -> None:
+        self.bricks.draw()
+        self.draw_balls()
         draw_texture(
             self.texture_manager.get_texture("Paddle"),
             int(self.paddle.bounding_box.x),
             int(self.paddle.bounding_box.y),
-            WHITE,
+            self.paddle.color,
         )
-
-        # HUD
         self.hud.draw(self.player_lives, self.score)
 
         # count-down
         if self.game_timer.is_running():
-            self.draw_text_centered(str(math.ceil(self.game_timer.get_counter())))
-
-    def draw_text_centered(
-        self, msg: str, font_size: int = 40, offset_x: int = 0, offset_y: int = 0
-    ) -> None:
-        msg_width: int = measure_text(msg, font_size)
-        msg_x: int = int((self.play_bounds.width / 2) - (msg_width / 2)) + offset_x
-        msg_y: int = int((self.play_bounds.height / 2) - (font_size / 2)) + offset_y
-        draw_text(msg, msg_x, msg_y, font_size, WHITE)
+            draw_text_centered(str(math.ceil(self.game_timer.get_counter())), self.play_bounds)
 
     def handle_ball_walls(self, ball: Ball) -> None:
         # left
@@ -331,12 +333,12 @@ class GameplayState(GameState):
         )
         self.balls = [
             Ball(
-                speed=250.0,
+                speed=BALL_SPEED,
                 position=Vector2(
-                    (self.play_bounds.width / 2), (self.paddle.bounding_box.y - 50)
+                    (self.play_bounds.width / 2), (self.paddle.bounding_box.y - BALL_INIT_Y_OFFSET)
                 ),
-                radius=5.0,
-                color=WHITE,
-                velocity=BALL_INIT_VELOCITY,
+                radius=BALL_RADIUS,
+                color=BALL_COLOR,
+                velocity=Vector2(BALL_INIT_VELOCITY.x, BALL_INIT_VELOCITY.y),
             ),
         ]

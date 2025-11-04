@@ -1,6 +1,6 @@
 from typing import override
 
-from pyray import draw_text, WHITE
+from pyray import Color, draw_text
 
 from brick_and_ball_game.game_states.menu_state import MenuState
 from brick_and_ball_game.game_states.gameplay import GameplayState
@@ -73,9 +73,9 @@ class GameOverMenu(MenuState):
     @override
     def draw(self) -> None:
         if self.has_won:
-            draw_text("You Win!", 0, 0, 40, WHITE)
-            draw_text(f"Score: {self.score}", 0, 40, 30, WHITE)
+            draw_text("You Win!", 0, 0, 40, Color(255, 255, 255, 255))
+            draw_text(f"Score: {self.score}", 0, 40, 30, Color(255, 255, 255, 255))
         else:
-            draw_text("You lose.", 0, 0, 40, WHITE)
+            draw_text("You lose.", 0, 0, 40, Color(255, 255, 255, 255))
 
         super().draw()

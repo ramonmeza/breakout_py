@@ -1,16 +1,14 @@
 from pyray import (
     Color,
-    draw_circle,
-    draw_texture,
-    load_texture,
     Rectangle,
-    Texture,
-    unload_texture,
     Vector2,
-    WHITE,
 )
 
 from brick_and_ball_game.components.velocity_component import VelocityComponent
+from brick_and_ball_game.core.timer import Timer
+
+TRAIL_LENGTH: int = 15
+TRAIL_TIME: float = 0.01
 
 
 class Ball:
@@ -19,6 +17,9 @@ class Ball:
     radius: float
     color: Color
     velocity: VelocityComponent
+    trail_timer: Timer
+    trail: list[Vector2]
+    trail_length: int
 
     def __init__(
         self,
@@ -33,6 +34,9 @@ class Ball:
         self.radius = radius
         self.color = color
         self.velocity = VelocityComponent(speed, velocity, friction=0)
+        self.trail_length = TRAIL_LENGTH
+        self.trail_timer = Timer(TRAIL_TIME, start=True)
+        self.trail = []
 
     def bounce_off(self, rect: Rectangle) -> bool:
         if not self.active:
@@ -81,3 +85,11 @@ class Ball:
 
         # update position
         self.position = self.velocity.update(self.position, delta_time)
+    
+        self.trail_timer.update(delta_time)
+        if self.trail_timer.is_complete():
+            self.trail.append(Vector2(self.position.x, self.position.y))
+            if len(self.trail) > self.trail_length:
+                self.trail.pop(0)
+            self.trail_timer.reset()
+            self.trail_timer.start()

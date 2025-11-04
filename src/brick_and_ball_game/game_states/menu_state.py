@@ -3,12 +3,11 @@ from abc import abstractmethod
 from typing import override
 
 from pyray import (
+    Color,
     draw_text,
     KeyboardKey,
     measure_text,
     Rectangle,
-    WHITE,
-    YELLOW,
 )
 
 from brick_and_ball_game.core.game_state import GameState
@@ -76,7 +75,7 @@ class MenuState(GameState):
                 cur_x,
                 cur_y,
                 font_size,
-                YELLOW if i == self.current_selected_i else WHITE,
+                Color(255, 255, 0, 255) if i == self.current_selected_i else Color(255, 255, 255, 255),
             )
             cur_y += font_size + vpadding
 

@@ -2,7 +2,7 @@ from abc import ABC, abstractmethod
 
 from pyray import (
     begin_drawing,
-    BLACK,
+    Color,
     clear_background,
     close_window,
     draw_fps,
@@ -48,7 +48,7 @@ class App(ABC):
 
     def _draw(self) -> None:
         begin_drawing()
-        clear_background(BLACK)
+        clear_background(Color(0, 0, 0, 255))
         self.state_manager.draw()
         if DRAW_FPS:
             draw_fps(self.window_width - 85, 5)

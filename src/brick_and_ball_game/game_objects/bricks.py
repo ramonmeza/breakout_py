@@ -1,4 +1,11 @@
-from pyray import BLUE, Color, draw_rectangle, draw_texture, Rectangle, RED, Texture
+from pyray import (
+    Color,
+    draw_texture,
+    Rectangle,
+    Texture,
+)
+
+from brick_and_ball_game.core.utils import get_random_color
 
 
 class Brick:
@@ -26,7 +33,7 @@ class BrickGrid:
         self.cols = cols
         self.brick_width = int(bounding_box.width / self.cols)
         self.brick_height = int(bounding_box.height / self.rows)
-        self.bricks = [Brick(RED if bool(i % 2) else BLUE) for i in range(rows * cols)]
+        self.bricks = [Brick(get_random_color()) for _ in range(rows * cols)]
         self.texture = texture
         self.texture.width = self.brick_width
         self.texture.height = self.brick_height
