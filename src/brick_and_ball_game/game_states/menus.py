@@ -12,7 +12,11 @@ class MainMenu(MenuState):
 
     def load(self) -> None:
         super().load()
-        self.sound_manager.load_bgm("Main Menu", r"assets\bgm\DavidKBD - Pink Bloom Pack - 01 - Pink Bloom.ogg", volume=0.75)
+        self.sound_manager.load_bgm(
+            "Main Menu",
+            r"assets\bgm\DavidKBD - Pink Bloom Pack - 01 - Pink Bloom.ogg",
+            volume=0.75,
+        )
         self.sound_manager.play_bgm("Main Menu")
 
     @override

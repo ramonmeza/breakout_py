@@ -52,12 +52,12 @@ class SoundManager:
             return
         self.bgm[bgm_name] = load_music_stream(path)
         set_music_volume(self.bgm[bgm_name], volume)
-    
+
     def play_bgm(self, bgm_name: str) -> None:
         # song not loaded yet
         if bgm_name not in self.bgm:
             return
-        
+
         # song already playing
         if is_music_stream_playing(self.bgm[bgm_name]):
             return

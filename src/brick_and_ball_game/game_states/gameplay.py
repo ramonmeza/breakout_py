@@ -40,6 +40,7 @@ PLAYER_LIVES: int = 3
 BRICK_ROWS: int = 3
 BRICK_COLS: int = 5
 
+
 class GameplayStates(IntEnum):
     STATE_STARTING = 0
     STATE_PLAYING = 1
@@ -105,7 +106,9 @@ class GameplayState(GameState):
         self.balls = [
             Ball(
                 speed=BALL_SPEED,
-                position=Vector2((self.play_bounds.width / 2), (paddle_y - BALL_INIT_Y_OFFSET)),
+                position=Vector2(
+                    (self.play_bounds.width / 2), (paddle_y - BALL_INIT_Y_OFFSET)
+                ),
                 radius=BALL_RADIUS,
                 color=BALL_COLOR,
                 velocity=Vector2(BALL_INIT_VELOCITY.x, BALL_INIT_VELOCITY.y),
@@ -142,7 +145,11 @@ class GameplayState(GameState):
         self.sound_manager.load_sfx("Win", r"assets\sfx\stat_increase.wav")
         self.sound_manager.load_sfx("Life Lost", r"assets\sfx\Explosion_6.wav")
 
-        self.sound_manager.load_bgm("Gameplay", r"assets\bgm\DavidKBD - Pink Bloom Pack - 02 - Portal to Underworld.ogg", volume=0.75)
+        self.sound_manager.load_bgm(
+            "Gameplay",
+            r"assets\bgm\DavidKBD - Pink Bloom Pack - 02 - Portal to Underworld.ogg",
+            volume=0.75,
+        )
         self.sound_manager.play_bgm("Gameplay")
 
     @override
@@ -257,7 +264,9 @@ class GameplayState(GameState):
 
         # count-down
         if self.game_timer.is_running():
-            draw_text_centered(str(math.ceil(self.game_timer.get_counter())), self.play_bounds)
+            draw_text_centered(
+                str(math.ceil(self.game_timer.get_counter())), self.play_bounds
+            )
 
     def handle_ball_walls(self, ball: Ball) -> None:
         # left
@@ -335,7 +344,8 @@ class GameplayState(GameState):
             Ball(
                 speed=BALL_SPEED,
                 position=Vector2(
-                    (self.play_bounds.width / 2), (self.paddle.bounding_box.y - BALL_INIT_Y_OFFSET)
+                    (self.play_bounds.width / 2),
+                    (self.paddle.bounding_box.y - BALL_INIT_Y_OFFSET),
                 ),
                 radius=BALL_RADIUS,
                 color=BALL_COLOR,

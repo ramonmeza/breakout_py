@@ -85,7 +85,7 @@ class Ball:
 
         # update position
         self.position = self.velocity.update(self.position, delta_time)
-    
+
         self.trail_timer.update(delta_time)
         if self.trail_timer.is_complete():
             self.trail.append(Vector2(self.position.x, self.position.y))

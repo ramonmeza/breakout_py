@@ -75,7 +75,11 @@ class MenuState(GameState):
                 cur_x,
                 cur_y,
                 font_size,
-                Color(255, 255, 0, 255) if i == self.current_selected_i else Color(255, 255, 255, 255),
+                (
+                    Color(255, 255, 0, 255)
+                    if i == self.current_selected_i
+                    else Color(255, 255, 255, 255)
+                ),
             )
             cur_y += font_size + vpadding
 
