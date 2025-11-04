@@ -56,16 +56,19 @@ class StateManager:
         self.states.append(state)
         self.states[-1].load()
 
-    def pop(self) -> GameState | None:
+    def pop(self, resume: bool = False) -> GameState | None:
         if not self.is_empty():
             state: GameState = self.states.pop()
             state.unload()
+            if not resume and not self.is_empty():
+                self.states[-1].load()
             return state
         return None
 
     def update(self, delta_time: float) -> None:
         if not self.is_empty():
             self.states[-1].update(delta_time)
+            self.sound_manager.update()
 
     def draw(self) -> None:
         if not self.is_empty():

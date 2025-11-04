@@ -26,13 +26,18 @@ from brick_and_ball_game.game_objects.bricks import BrickGrid
 from brick_and_ball_game.game_objects.paddle import Paddle
 
 
+BALL_OFF_BRICK_SCORE: int = 15
+BALL_OFF_PADDLE_SCORE: int = 25
 RESPAWN_TIMER: float = 3.0
 BALL_RADIUS: float = 7.0
 BALL_SPEED: float = 300.0
+BALL_INIT_VELOCITY: Vector2 = Vector2(0.0, 1.0)
+BALL_SPEED_GAIN_PADDLE: float = 25.0
+BALL_SPEED_GAIN_WALL: float = 5.0
+BALL_SPEED_GAIN_BRICK: float = 15.0
 PLAYER_LIVES: int = 3
 BRICK_ROWS: int = 3
 BRICK_COLS: int = 5
-
 
 class GameplayStates(IntEnum):
     STATE_STARTING = 0
@@ -102,7 +107,7 @@ class GameplayState(GameState):
                 position=Vector2((self.play_bounds.width / 2), (paddle_y - 50)),
                 radius=BALL_RADIUS,
                 color=RED,
-                velocity=Vector2(0.0, -1.0),
+                velocity=BALL_INIT_VELOCITY,
             ),
         ]
         self.texture_manager.load_texture("Ball", r"assets\textures\ballGrey.png")
@@ -135,6 +140,9 @@ class GameplayState(GameState):
         self.sound_manager.load_sfx("Lose", r"assets\sfx\lose_1.wav")
         self.sound_manager.load_sfx("Win", r"assets\sfx\stat_increase.wav")
         self.sound_manager.load_sfx("Life Lost", r"assets\sfx\Explosion_6.wav")
+
+        self.sound_manager.load_bgm("Gameplay", r"assets\bgm\DavidKBD - Pink Bloom Pack - 02 - Portal to Underworld.ogg", volume=0.75)
+        self.sound_manager.play_bgm("Gameplay")
 
     @override
     def unload(self) -> None:
@@ -296,7 +304,7 @@ class GameplayState(GameState):
 
                     if ball.bounce_off(brick_rect):
                         brick.hit_count -= 1
-                        self.score += 10
+                        self.score += BALL_OFF_BRICK_SCORE
                         self.sound_manager.play_sfx("Bounce Brick")
 
     def handle_ball_paddle(self, ball: Ball) -> None:
@@ -311,8 +319,8 @@ class GameplayState(GameState):
             ball_dir = vector2_normalize(ball_dir)
             ball.velocity.x = ball_dir.x
             ball.velocity.y = ball_dir.y
-            ball.velocity.speed += 25.0
-            self.score += 5
+            ball.velocity.speed += BALL_SPEED_GAIN_PADDLE
+            self.score += BALL_OFF_PADDLE_SCORE
             self.sound_manager.play_sfx("Bounce Paddle")
 
     def respawn(self) -> None:
@@ -329,6 +337,6 @@ class GameplayState(GameState):
                 ),
                 radius=5.0,
                 color=WHITE,
-                velocity=Vector2(0.0, -1.0),
+                velocity=BALL_INIT_VELOCITY,
             ),
         ]

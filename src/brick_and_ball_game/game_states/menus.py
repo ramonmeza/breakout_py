@@ -10,6 +10,11 @@ class MainMenu(MenuState):
     def __init__(self) -> None:
         super().__init__(["Play", "Quit"])
 
+    def load(self) -> None:
+        super().load()
+        self.sound_manager.load_bgm("Main Menu", r"assets\bgm\DavidKBD - Pink Bloom Pack - 01 - Pink Bloom.ogg", volume=0.75)
+        self.sound_manager.play_bgm("Main Menu")
+
     @override
     def select(self, selected_option: int) -> None:
         match selected_option:
@@ -30,7 +35,7 @@ class PauseMenu(MenuState):
         match selected_option:
             case 0:
                 # resume
-                self.state_manager.pop()  # pop pause menu
+                self.state_manager.pop(resume=True)  # pop pause menu
 
             case _:
                 self.state_manager.pop()  # pop pause menu
